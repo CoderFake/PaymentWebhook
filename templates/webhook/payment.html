@@ -164,6 +164,12 @@
             font-size: 18px;
         }
         
+        .cancel-container {
+            grid-column: 1 / -1;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
         .cancel-btn {
             background-color: #dc3545;
             color: white;
@@ -234,7 +240,7 @@
                 Phiên giao dịch sẽ hết hạn sau: <strong id="countdown">10:00</strong>
             </div>
             
-            <div style="text-align: center; margin-top: 20px;">
+            <div class="cancel-container">
                 <button id="cancelBtn" class="cancel-btn">Hủy thanh toán</button>
             </div>
         </div>
