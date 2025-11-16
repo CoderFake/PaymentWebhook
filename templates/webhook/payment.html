@@ -213,11 +213,9 @@
     </div>
     
     <script>
-        // Polling để check payment status
         const orderId = '{{ order_id }}';
         const expiredAt = new Date('{{ expired_at }}');
         
-        // Countdown timer
         function updateCountdown() {
             const now = new Date();
             const diff = expiredAt - now;
@@ -226,7 +224,7 @@
                 document.getElementById('countdown').textContent = '00:00';
                 clearInterval(countdownInterval);
                 clearInterval(pollingInterval);
-                window.location.href = `{{ return_url }}?order_id=${orderId}&status=cancelled`;
+                setTimeout(() => window.location.reload(), 1000);
                 return;
             }
             
@@ -239,7 +237,6 @@
         const countdownInterval = setInterval(updateCountdown, 1000);
         updateCountdown();
         
-        // Polling payment status
         async function checkPaymentStatus() {
             try {
                 const response = await fetch(`/api/payment-status/${orderId}/`);
@@ -248,22 +245,19 @@
                 if (data.status === 'paid') {
                     clearInterval(pollingInterval);
                     clearInterval(countdownInterval);
-                    // Redirect về local
                     window.location.href = data.return_url;
                 } else if (data.status === 'expired') {
                     clearInterval(pollingInterval);
                     clearInterval(countdownInterval);
-                    window.location.href = data.return_url;
+                    window.location.reload();
                 }
             } catch (error) {
                 console.error('Error checking payment status:', error);
             }
         }
         
-        // Poll every 3 seconds
         const pollingInterval = setInterval(checkPaymentStatus, 3000);
         
-        // Check immediately
         checkPaymentStatus();
     </script>
 </body>
