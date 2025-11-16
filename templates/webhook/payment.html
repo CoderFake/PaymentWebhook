@@ -212,6 +212,104 @@
             cursor: not-allowed;
             opacity: 0.6;
         }
+        
+        /* Modal styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-overlay.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            animation: modalSlideIn 0.3s ease;
+        }
+        
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .modal-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-icon {
+            font-size: 48px;
+            color: #dc3545;
+            margin-bottom: 10px;
+        }
+        
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .modal-message {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.5;
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+        }
+        
+        .modal-btn {
+            flex: 1;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-btn-cancel {
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        
+        .modal-btn-cancel:hover {
+            background-color: #e9ecef;
+        }
+        
+        .modal-btn-confirm {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .modal-btn-confirm:hover {
+            background-color: #c82333;
+        }
     </style>
 </head>
 <body>
@@ -271,6 +369,24 @@
         </div>
     </div>
     
+    <!-- Cancel Confirmation Modal -->
+    <div id="cancelModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-icon">⚠️</div>
+                <div class="modal-title">Xác nhận hủy thanh toán</div>
+                <div class="modal-message">
+                    Bạn có chắc chắn muốn hủy giao dịch này không? 
+                    Bạn sẽ phải tạo lại đơn hàng mới nếu muốn thanh toán.
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-cancel" onclick="closeModal()">Không</button>
+                <button class="modal-btn modal-btn-confirm" onclick="confirmCancel()">Đồng ý hủy</button>
+            </div>
+        </div>
+    </div>
+    
     <script>
         const orderId = '{{ order_id }}';
         const expiredAt = new Date('{{ expired_at }}');
@@ -323,12 +439,19 @@
         
         checkPaymentStatus();
         
-        document.getElementById('cancelBtn').addEventListener('click', async function() {
-            if (!confirm('Bạn có chắc muốn hủy thanh toán này?')) {
-                return;
-            }
+        // Modal functions
+        function openModal() {
+            document.getElementById('cancelModal').classList.add('active');
+        }
+        
+        function closeModal() {
+            document.getElementById('cancelModal').classList.remove('active');
+        }
+        
+        async function confirmCancel() {
+            closeModal();
             
-            const btn = this;
+            const btn = document.getElementById('cancelBtn');
             btn.disabled = true;
             btn.textContent = 'Đang hủy...';
             
@@ -345,7 +468,6 @@
                 if (response.ok) {
                     clearInterval(pollingInterval);
                     clearInterval(countdownInterval);
-                    // Redirect về local với status=cancelled
                     window.location.href = data.return_url;
                 } else {
                     alert('Lỗi: ' + (data.error || 'Không thể hủy thanh toán'));
@@ -357,6 +479,16 @@
                 alert('Có lỗi xảy ra khi hủy thanh toán');
                 btn.disabled = false;
                 btn.textContent = 'Hủy thanh toán';
+            }
+        }
+        
+        document.getElementById('cancelBtn').addEventListener('click', function() {
+            openModal();
+        });
+    
+        document.getElementById('cancelModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
             }
         });
     </script>
