@@ -25,16 +25,32 @@
             background: white;
             border-radius: 20px;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.08);
-            max-width: 500px;
+            max-width: 900px;
             width: 100%;
             padding: 40px;
-            text-align: center;
         }
         
         h1 {
             color: #333;
-            margin-bottom: 10px;
+            margin-bottom: 30px;
             font-size: 28px;
+            text-align: center;
+        }
+        
+        .payment-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+        
+        @media (max-width: 768px) {
+            .payment-content {
+                grid-template-columns: 1fr;
+            }
+            .container {
+                padding: 30px 20px;
+            }
         }
         
         .order-info {
@@ -68,15 +84,16 @@
         }
         
         .qr-container {
-            margin: 30px 0;
             padding: 20px;
             background: #fff;
             border: 2px solid #e9ecef;
             border-radius: 12px;
+            text-align: center;
         }
         
         .qr-code {
-            max-width: 100%;
+            width: 100%;
+            max-width: 300px;
             height: auto;
             border-radius: 8px;
         }
@@ -115,6 +132,7 @@
             background: #fff3cd;
             border-radius: 8px;
             color: #856404;
+            grid-column: 1 / -1;
         }
         
         .spinner {
@@ -133,9 +151,12 @@
         }
         
         .timer {
+            color: #dc3545;
+            font-size: 16px;
+            font-weight: 600;
             margin-top: 20px;
-            font-size: 14px;
-            color: #666;
+            text-align: center;
+            grid-column: 1 / -1;
         }
         
         .timer strong {
@@ -146,44 +167,48 @@
 </head>
 <body>
     <div class="container">
-        <h1>🎯 Quét mã QR để thanh toán</h1>
+        <h1>Quét mã QR để thanh toán</h1>
         
-        <div class="order-info">
-            <div class="info-row">
-                <span class="info-label">Mã đơn hàng:</span>
-                <span class="info-value">{{ order_id }}</span>
+        <div class="payment-content">
+            <div class="qr-container">
+                <img src="{{ qr_url }}" alt="QR Code" class="qr-code" id="qrCode">
             </div>
-            <div class="info-row">
-                <span class="info-label">Số tiền:</span>
-                <span class="amount">{{ amount|floatformat:0 }}đ</span>
+            
+            <div>
+                <div class="order-info">
+                    <div class="info-row">
+                        <span class="info-label">Mã đơn hàng:</span>
+                        <span class="info-value">{{ order_id }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Số tiền:</span>
+                        <span class="amount">{{ amount|floatformat:0 }}đ</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Nội dung:</span>
+                        <span class="info-value">{{ description }}</span>
+                    </div>
+                </div>
+                
+                <div class="instructions">
+                    <h3>Hướng dẫn thanh toán:</h3>
+                    <ol>
+                        <li>Mở app ngân hàng của bạn</li>
+                        <li>Chọn chức năng quét mã QR</li>
+                        <li>Quét mã QR trên màn hình</li>
+                        <li>Xác nhận thông tin và thanh toán</li>
+                    </ol>
+                </div>
             </div>
-            <div class="info-row">
-                <span class="info-label">Nội dung:</span>
-                <span class="info-value">{{ description }}</span>
+            
+            <div class="status">
+                <div class="spinner"></div>
+                <span>Đang chờ thanh toán...</span>
             </div>
-        </div>
-        
-        <div class="qr-container">
-            <img src="{{ qr_url }}" alt="QR Code" class="qr-code" id="qrCode">
-        </div>
-        
-        <div class="instructions">
-            <h3>📱 Hướng dẫn thanh toán:</h3>
-            <ol>
-                <li>Mở app ngân hàng của bạn</li>
-                <li>Chọn chức năng quét mã QR</li>
-                <li>Quét mã QR trên màn hình</li>
-                <li>Xác nhận thông tin và thanh toán</li>
-            </ol>
-        </div>
-        
-        <div class="status">
-            <div class="spinner"></div>
-            <span>Đang chờ thanh toán...</span>
-        </div>
-        
-        <div class="timer">
-            Phiên giao dịch sẽ hết hạn sau: <strong id="countdown">10:00</strong>
+            
+            <div class="timer">
+                Phiên giao dịch sẽ hết hạn sau: <strong id="countdown">10:00</strong>
+            </div>
         </div>
     </div>
     
