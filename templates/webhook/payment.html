@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thanh toán - QR Code</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .order-info {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            font-size: 16px;
+        }
+        
+        .info-label {
+            color: #666;
+            font-weight: 500;
+        }
+        
+        .info-value {
+            color: #333;
+            font-weight: 600;
+        }
+        
+        .amount {
+            color: #667eea;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .qr-container {
+            margin: 30px 0;
+            padding: 20px;
+            background: #fff;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+        }
+        
+        .qr-code {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+        
+        .instructions {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        
+        .instructions h3 {
+            color: #2196F3;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .instructions ol {
+            margin-left: 20px;
+            color: #555;
+        }
+        
+        .instructions li {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        
+        .status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px 0;
+            padding: 15px;
+            background: #fff3cd;
+            border-radius: 8px;
+            color: #856404;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .timer {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .timer strong {
+            color: #dc3545;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Quét mã QR để thanh toán</h1>
+        
+        <div class="order-info">
+            <div class="info-row">
+                <span class="info-label">Mã đơn hàng:</span>
+                <span class="info-value">{{ order_id }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Số tiền:</span>
+                <span class="amount">{{ amount|floatformat:0 }}đ</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Nội dung:</span>
+                <span class="info-value">{{ description }}</span>
+            </div>
+        </div>
+        
+        <div class="qr-container">
+            <img src="{{ qr_url }}" alt="QR Code" class="qr-code" id="qrCode">
+        </div>
+        
+        <div class="instructions">
+            <h3>📱 Hướng dẫn thanh toán:</h3>
+            <ol>
+                <li>Mở app ngân hàng của bạn</li>
+                <li>Chọn chức năng quét mã QR</li>
+                <li>Quét mã QR trên màn hình</li>
+                <li>Xác nhận thông tin và thanh toán</li>
+            </ol>
+        </div>
+        
+        <div class="status">
+            <div class="spinner"></div>
+            <span>Đang chờ thanh toán...</span>
+        </div>
+        
+        <div class="timer">
+            Phiên giao dịch sẽ hết hạn sau: <strong id="countdown">10:00</strong>
+        </div>
+    </div>
+    
+    <script>
+        // Polling để check payment status
+        const orderId = '{{ order_id }}';
+        const expiredAt = new Date('{{ expired_at }}');
+        
+        // Countdown timer
+        function updateCountdown() {
+            const now = new Date();
+            const diff = expiredAt - now;
+            
+            if (diff <= 0) {
+                document.getElementById('countdown').textContent = '00:00';
+                clearInterval(countdownInterval);
+                clearInterval(pollingInterval);
+                window.location.href = `{{ return_url }}?order_id=${orderId}&status=cancelled`;
+                return;
+            }
+            
+            const minutes = Math.floor(diff / 60000);
+            const seconds = Math.floor((diff % 60000) / 1000);
+            document.getElementById('countdown').textContent = 
+                `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+        
+        const countdownInterval = setInterval(updateCountdown, 1000);
+        updateCountdown();
+        
+        // Polling payment status
+        async function checkPaymentStatus() {
+            try {
+                const response = await fetch(`/api/payment-status/${orderId}/`);
+                const data = await response.json();
+                
+                if (data.status === 'paid') {
+                    clearInterval(pollingInterval);
+                    clearInterval(countdownInterval);
+                    // Redirect về local
+                    window.location.href = data.return_url;
+                } else if (data.status === 'expired') {
+                    clearInterval(pollingInterval);
+                    clearInterval(countdownInterval);
+                    window.location.href = data.return_url;
+                }
+            } catch (error) {
+                console.error('Error checking payment status:', error);
+            }
+        }
+        
+        // Poll every 3 seconds
+        const pollingInterval = setInterval(checkPaymentStatus, 3000);
+        
+        // Check immediately
+        checkPaymentStatus();
+    </script>
+</body>
+</html>
+

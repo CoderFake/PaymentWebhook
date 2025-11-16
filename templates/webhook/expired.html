@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phiên thanh toán đã hết hạn</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 500px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            text-align: center;
+        }
+
+        .icon {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 30px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+            color: white;
+        }
+
+        h1 {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        p {
+            font-size: 16px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .info-box {
+            background: #f8f9fa;
+            border-left: 4px solid #f5576c;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .info-box strong {
+            display: block;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .info-box span {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .btn-back {
+            display: inline-block;
+            padding: 15px 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 16px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 20px;
+        }
+
+        .btn-back:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 30px 20px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .icon {
+                width: 80px;
+                height: 80px;
+                font-size: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">⏱️</div>
+        
+        <h1>Phiên thanh toán đã hết hạn</h1>
+        
+        <p>
+            Phiên thanh toán của bạn đã vượt quá thời gian cho phép ({{ expired_minutes }} phút).
+            Vui lòng quay lại trang chủ và tạo đơn hàng mới.
+        </p>
+
+        {% if order_id %}
+        <div class="info-box">
+            <strong>Mã đơn hàng:</strong>
+            <span>{{ order_id }}</span>
+        </div>
+        {% endif %}
+
+        {% if created_at %}
+        <div class="info-box">
+            <strong>Thời gian tạo:</strong>
+            <span>{{ created_at|date:"d/m/Y H:i:s" }}</span>
+        </div>
+        {% endif %}
+
+        {% if expired_at %}
+        <div class="info-box">
+            <strong>Thời gian hết hạn:</strong>
+            <span>{{ expired_at|date:"d/m/Y H:i:s" }}</span>
+        </div>
+        {% endif %}
+
+        {% if return_url %}
+        <a href="{{ return_url }}" class="btn-back">Quay lại trang chủ</a>
+        {% endif %}
+    </div>
+</body>
+</html>
+

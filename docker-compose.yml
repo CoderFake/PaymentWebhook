@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: payment-webhook
+    volumes:
+      - .:/app
+      - static_volume:/app/staticfiles
+    ports:
+      - "${PORT:-8000}:8000"
+    environment:
+      - SECRET_KEY=${SECRET_KEY}
+      - DEBUG=${DEBUG:-False}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-*}
+      - CASSO_WEBHOOK_SECRET=${CASSO_WEBHOOK_SECRET}
+      - DB_ENGINE=django.db.backends.postgresql
+      - DB_NAME=${DB_NAME:-payment_webhook_db}
+      - DB_USER=${DB_USER:-admin}
+      - DB_PASSWORD=${DB_PASSWORD:-admin}
+      - DB_HOST=db
+      - DB_PORT=5432
+    env_file:
+      - .env
+    restart: unless-stopped
+    depends_on:
+      - db
+
+  db:
+    image: postgres:15.1-alpine
+    container_name: payment-webhook-db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ${DB_NAME:-payment_webhook_db}
+      POSTGRES_USER: ${DB_USER:-admin}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-admin}
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  static_volume:
+

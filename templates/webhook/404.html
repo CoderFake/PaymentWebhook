@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Không tìm thấy</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 50px 40px;
+            text-align: center;
+        }
+
+        .error-code {
+            font-size: 120px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+            margin-bottom: 20px;
+        }
+
+        .icon {
+            font-size: 80px;
+            margin-bottom: 30px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        h1 {
+            font-size: 32px;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        p {
+            font-size: 18px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .error-details {
+            background: #f8f9fa;
+            border-left: 4px solid #dc3545;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 30px 0;
+            text-align: left;
+        }
+
+        .error-details strong {
+            display: block;
+            color: #dc3545;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .error-details p {
+            color: #666;
+            font-size: 15px;
+            margin: 0;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 15px 35px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #666;
+            border: 2px solid #ddd;
+        }
+
+        .btn-secondary:hover {
+            background: #e9ecef;
+            border-color: #999;
+        }
+
+        .suggestions {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .suggestions h3 {
+            color: #2196F3;
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+
+        .suggestions ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .suggestions li {
+            padding: 8px 0;
+            color: #555;
+            font-size: 15px;
+        }
+
+        .suggestions li:before {
+            content: "→ ";
+            color: #2196F3;
+            font-weight: bold;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 40px 25px;
+            }
+
+            .error-code {
+                font-size: 80px;
+            }
+
+            h1 {
+                font-size: 26px;
+            }
+
+            .buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">🔍</div>
+        <div class="error-code">404</div>
+        
+        <h1>Không tìm thấy phiên thanh toán</h1>
+        
+        <p>
+            Phiên thanh toán bạn đang tìm kiếm không tồn tại hoặc đã bị xóa.
+        </p>
+
+        {% if order_id %}
+        <div class="error-details">
+            <strong>Mã đơn hàng không tồn tại:</strong>
+            <p>{{ order_id }}</p>
+        </div>
+        {% endif %}
+
+        {% if error_message %}
+        <div class="error-details">
+            <strong>Chi tiết lỗi:</strong>
+            <p>{{ error_message }}</p>
+        </div>
+        {% endif %}
+
+        <div class="suggestions">
+            <h3>💡 Gợi ý:</h3>
+            <ul>
+                <li>Kiểm tra lại mã đơn hàng của bạn</li>
+                <li>Phiên thanh toán có thể đã hết hạn</li>
+                <li>Đơn hàng có thể đã được thanh toán</li>
+                <li>Quay lại trang chủ và tạo đơn hàng mới</li>
+            </ul>
+        </div>
+
+        <div class="buttons">
+            {% if return_url %}
+                <a href="{{ return_url }}" class="btn btn-primary">Về trang chủ</a>
+            {% else %}
+                <a href="/" class="btn btn-primary">Về trang chủ</a>
+            {% endif %}
+            <a href="javascript:history.back()" class="btn btn-secondary">Quay lại</a>
+        </div>
+    </div>
+</body>
+</html>
+
