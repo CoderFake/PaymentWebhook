@@ -234,17 +234,37 @@ def casso_webhook(request):
         description = data.get('description', '')
         amount = data.get('amount')
         
-        words = description.split()
+        if transaction_id is None:
+            logger.error("Missing transaction id in Casso webhook")
+            return JsonResponse({'status': 'error', 'message': 'Missing transaction id'}, status=400)
+        
+        if amount is None or amount <= 0:
+            logger.error(f"Invalid amount in Casso webhook: {amount}")
+            return JsonResponse({'status': 'error', 'message': 'Invalid amount'}, status=400)
+        
+        logger.info(f"Processing transaction - ID: {transaction_id}, Amount: {amount}, Description: {description}")
+        
         order_id = None
         
-        for word in words:
-            if word.isdigit() and len(word) >= 10:  
-                order_id = word
-                break
+        if description.startswith('P') and len(description) <= 20:
+            potential_order = description[1:]
+            if potential_order.isdigit() and len(potential_order) >= 10:
+                order_id = potential_order
+                logger.info(f"Parsed compact format - Order: {order_id}")
+        
+        if not order_id:
+            logger.info("Trying fallback extraction")
+            words = description.split()
+            for word in words:
+                if word.isdigit() and len(word) >= 10:  
+                    order_id = word
+                    break
         
         if not order_id:
             logger.warning(f"Could not extract order_id from description: {description}")
-            return JsonResponse({'status': 'error', 'message': 'Invalid description'}, status=400)
+            return JsonResponse({'status': 'error', 'message': 'Invalid description format - missing order_id'}, status=400)
+        
+        logger.info(f"Extracted order_id: {order_id}")
         
         try:
             session = PaymentSession.objects.get(order_id=order_id)
@@ -267,7 +287,7 @@ def casso_webhook(request):
                 if session.payment_type == 'monthly_fund' and amount > session.amount:
                     surplus = amount - session.amount
                     
-                    logger.info(f"Amount surplus detected for order {order_id}: surplus={surplus}")
+                    logger.info(f"Amount surplus detected for order {order_id}: surplus={surplus} (paid={amount}, expected={session.amount})")
                     
                     if surplus > 0:
                         donate_order_id = str(int(order_id) + 1)
