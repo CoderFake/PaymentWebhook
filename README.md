@@ -57,14 +57,14 @@ PORT=8000
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | `/?signature=...` | GET | Payment page with QR code |
-| `/webhook/casso/` | POST | Casso webhook receiver |
+| `/webhook/bank-transaction/` | POST | Casso webhook receiver |
 | `/api/payment-status/<order_id>/` | GET | Check payment status (polling) |
 | `/api/payment-info/<order_id>/` | GET | Get payment details |
 
 ## Casso Configuration
 
 1. Login to https://casso.vn
-2. Settings → Webhook → Add URL: `https://pay.hoangdieuit.io.vn/webhook/casso/`
+2. Settings → Webhook → Add URL: `https://pay.hoangdieuit.io.vn/webhook/bank-transaction/`
 3. Enable "New Transaction" event
 
 ## Payment Flow
