@@ -192,12 +192,18 @@ def payment_view(request):
 
 
 @csrf_exempt
-@require_http_methods(["POST"])
+@require_http_methods(["GET", "POST"])
 def casso_webhook(request):
     """
     Webhook endpoint để nhận thông báo từ Casso khi có giao dịch mới
     Format Casso V2: {"error": 0, "data": {...transaction...}}
+    GET: Test endpoint (Casso verification)
+    POST: Actual webhook data
     """
+    if request.method == "GET":
+        logger.info("Casso webhook verification (GET request)")
+        return JsonResponse({'status': 'ok', 'message': 'Webhook endpoint ready'})
+    
     try:
         payload = json.loads(request.body)
         

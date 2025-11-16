@@ -6,6 +6,7 @@ app_name = 'webhook'
 urlpatterns = [
     path('', views.payment_view, name='payment'),
     path('webhook/bank-transaction/', views.casso_webhook, name='casso_webhook'),
+    path('webhook/bank-transaction', views.casso_webhook, name='casso_webhook_v2'),
     path('api/payment-status/<str:order_id>/', views.check_payment_status, name='check_payment_status'),
     path('api/payment-info/<str:order_id>/', views.get_payment_info, name='get_payment_info'),
 ]

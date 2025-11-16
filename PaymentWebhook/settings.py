@@ -32,6 +32,8 @@ DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
 
+APPEND_SLASH = False
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
