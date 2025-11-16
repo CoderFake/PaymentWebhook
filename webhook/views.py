@@ -253,8 +253,9 @@ def casso_webhook(request):
         
         order_id = None
         
-        if description.startswith('P') and len(description) <= 20:
-            potential_order = description[1:]
+        if description.startswith('P'):
+            first_part = description.split()[0] if ' ' in description else description
+            potential_order = first_part[1:]
             if potential_order.isdigit() and len(potential_order) >= 10:
                 order_id = potential_order
                 logger.info(f"Parsed compact format - Order: {order_id}")
