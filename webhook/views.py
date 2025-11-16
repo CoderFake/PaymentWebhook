@@ -159,6 +159,13 @@ def payment_view(request):
             
             return redirect(redirect_url)
         
+        if session.status == 'cancelled':
+            return render(request, 'webhook/error.html', {
+                'error': 'Giao dịch đã bị hủy',
+                'error_code': 'PAYMENT_CANCELLED',
+                'order_id': order_id
+            })
+        
         time_remaining = (session.expired_at - timezone.now()).total_seconds()
         if time_remaining < 0:
             time_remaining = 0
@@ -394,6 +401,43 @@ def get_payment_info(request, order_id):
         }, status=500)
 
 
+@csrf_exempt
+@require_http_methods(["POST"])
+def cancel_payment(request, order_id):
+    """
+    API endpoint để hủy payment
+    """
+    try:
+        session = PaymentSession.objects.get(order_id=order_id)
+        
+        if session.status != 'pending':
+            return JsonResponse({
+                'error': f'Không thể hủy thanh toán với trạng thái {session.status}'
+            }, status=400)
+        
+        # Mark as cancelled
+        session.status = 'cancelled'
+        session.save()
+        
+        logger.info(f"Payment {order_id} cancelled by user")
+        
+        return JsonResponse({
+            'status': 'success',
+            'order_id': order_id,
+            'return_url': f"{session.return_url}?order_id={order_id}&status=cancelled"
+        })
+        
+    except PaymentSession.DoesNotExist:
+        return JsonResponse({
+            'error': 'Payment session not found'
+        }, status=404)
+    except Exception as e:
+        logger.error(f"Error cancelling payment: {str(e)}")
+        return JsonResponse({
+            'error': str(e)
+        }, status=500)
+
+
 @require_http_methods(["GET"])
 def check_payment_status(request, order_id):
     """
@@ -421,6 +465,10 @@ def check_payment_status(request, order_id):
                 pass
             
             response_data['return_url'] = redirect_url
+        elif session.status == 'cancelled':
+            response_data['status'] = 'cancelled'
+            response_data['return_url'] = f"{session.return_url}?order_id={order_id}&status=cancelled"
+        
         elif session.is_expired() and session.status == 'pending':
             session.status = 'expired'
             session.save()

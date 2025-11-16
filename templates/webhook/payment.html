@@ -163,6 +163,30 @@
             color: #dc3545;
             font-size: 18px;
         }
+        
+        .cancel-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(220, 53, 69, 0.2);
+        }
+        
+        .cancel-btn:hover {
+            background-color: #c82333;
+            box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .cancel-btn:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
     </style>
 </head>
 <body>
@@ -209,6 +233,10 @@
             <div class="timer">
                 Phiên giao dịch sẽ hết hạn sau: <strong id="countdown">10:00</strong>
             </div>
+            
+            <div style="text-align: center; margin-top: 20px;">
+                <button id="cancelBtn" class="cancel-btn">Hủy thanh toán</button>
+            </div>
         </div>
     </div>
     
@@ -246,6 +274,10 @@
                     clearInterval(pollingInterval);
                     clearInterval(countdownInterval);
                     window.location.href = data.return_url;
+                } else if (data.status === 'cancelled') {
+                    clearInterval(pollingInterval);
+                    clearInterval(countdownInterval);
+                    window.location.href = data.return_url;
                 } else if (data.status === 'expired') {
                     clearInterval(pollingInterval);
                     clearInterval(countdownInterval);
@@ -259,6 +291,43 @@
         const pollingInterval = setInterval(checkPaymentStatus, 3000);
         
         checkPaymentStatus();
+        
+        document.getElementById('cancelBtn').addEventListener('click', async function() {
+            if (!confirm('Bạn có chắc muốn hủy thanh toán này?')) {
+                return;
+            }
+            
+            const btn = this;
+            btn.disabled = true;
+            btn.textContent = 'Đang hủy...';
+            
+            try {
+                const response = await fetch(`/api/cancel-payment/${orderId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    clearInterval(pollingInterval);
+                    clearInterval(countdownInterval);
+                    // Redirect về local với status=cancelled
+                    window.location.href = data.return_url;
+                } else {
+                    alert('Lỗi: ' + (data.error || 'Không thể hủy thanh toán'));
+                    btn.disabled = false;
+                    btn.textContent = 'Hủy thanh toán';
+                }
+            } catch (error) {
+                console.error('Error cancelling payment:', error);
+                alert('Có lỗi xảy ra khi hủy thanh toán');
+                btn.disabled = false;
+                btn.textContent = 'Hủy thanh toán';
+            }
+        });
     </script>
 </body>
 </html>

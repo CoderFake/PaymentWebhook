@@ -61,11 +61,26 @@ PORT=8000
 | `/api/payment-status/<order_id>/` | GET | Check payment status (polling) |
 | `/api/payment-info/<order_id>/` | GET | Get payment details |
 
+## Description Format
+
+The system uses a compact format for bank transfer descriptions to stay within VietQR's 25-character limit:
+
+**Format:** `P{order_id}`
+
+**Example:** `P200303009395843` (17 chars)
+
+This format:
+- ✅ Safe for VietQR `addInfo` parameter
+- ✅ Unique order identification
+- ✅ Automatically extracted by webhook
+- ✅ Backward compatible (fallback to old format)
+
 ## Casso Configuration
 
 1. Login to https://casso.vn
 2. Settings → Webhook → Add URL: `https://pay.hoangdieuit.io.vn/webhook/bank-transaction/`
 3. Enable "New Transaction" event
+4. Copy webhook secret to `.env` as `CASSO_WEBHOOK_SECRET`
 
 ## Payment Flow
 
