@@ -8,7 +8,8 @@ class PaymentSession(models.Model):
     """
     order_id = models.CharField(max_length=100, unique=True, db_index=True)
     amount = models.IntegerField()
-    description = models.TextField()
+    description = models.TextField()  
+    full_description = models.TextField(null=True, blank=True)
     account_number = models.CharField(max_length=50)
     return_url = models.URLField()
     username = models.CharField(max_length=100, null=True, blank=True)

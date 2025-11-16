@@ -1,3 +1,4 @@
+{% load humanize %}
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -51,6 +52,24 @@
             .container {
                 padding: 30px 20px;
             }
+        }
+        
+        .payment-for {
+            margin-bottom: 15px;
+            text-align: center;
+            color: #333;
+        }
+        
+        .payment-for strong {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .payment-for span {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2196F3;
+            margin-left: 5px;
         }
         
         .order-info {
@@ -205,6 +224,12 @@
             </div>
             
             <div>
+                {% if full_description %}
+                <div class="payment-for">
+                    <span>{{ full_description }}</span>
+                </div>
+                {% endif %}
+                
                 <div class="order-info">
                     <div class="info-row">
                         <span class="info-label">Mã đơn hàng:</span>
@@ -212,7 +237,7 @@
                     </div>
                     <div class="info-row">
                         <span class="info-label">Số tiền:</span>
-                        <span class="amount">{{ amount|floatformat:0 }}đ</span>
+                        <span class="amount">{{ amount|intcomma }}đ</span>
                     </div>
                     <div class="info-row">
                         <span class="info-label">Nội dung:</span>
