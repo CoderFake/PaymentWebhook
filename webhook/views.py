@@ -129,7 +129,7 @@ def payment_view(request):
                 'username': data.get('username'),
                 'payment_type': data.get('type'),
                 'per_month_price': data.get('per_month_price'),
-                'expired_at': datetime.fromtimestamp(data.get('expired_at'))
+                'expired_at': timezone.make_aware(datetime.fromtimestamp(data.get('expired_at')))
             }
         )
         
