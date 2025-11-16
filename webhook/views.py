@@ -124,6 +124,7 @@ def payment_view(request):
             defaults={
                 'amount': data.get('amount'),
                 'description': data.get('description'),
+                'full_description': data.get('full_description'),
                 'account_number': data.get('account_number'),
                 'return_url': data.get('return_url'),
                 'username': data.get('username'),
@@ -144,7 +145,7 @@ def payment_view(request):
                 'created_at': session.created_at,
                 'expired_at': session.expired_at,
                 'expired_minutes': expired_minutes,
-                'return_url': session.return_url.split('?')[0] if session.return_url else None  # Chỉ lấy base URL
+                'return_url': session.return_url.split('?')[0] if session.return_url else None
             })
         
         if session.status == 'paid':
@@ -174,6 +175,7 @@ def payment_view(request):
             'order_id': order_id,
             'amount': session.amount,
             'description': session.description,
+            'full_description': session.full_description,
             'qr_url': session.get_qr_url(),
             'expired_at': session.expired_at.isoformat(),
             'created_at': session.created_at.isoformat(),
